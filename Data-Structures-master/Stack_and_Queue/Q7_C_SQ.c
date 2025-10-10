@@ -113,7 +113,7 @@ int balanced(char *expression)
 		if (*expression == '(' || *expression == '[' || *expression == '{')
 			push(&s_temp, *expression);
 		else if (*expression == ')' || *expression == ']' || *expression == '}')
-			if (s_temp.ll.head == NULL && peek(&s_temp) != *expression)
+			if (s_temp.ll.head == NULL && peek(&s_temp) / 10 != *expression / 10)
 				return 1;
 			else
 				pop(&s_temp);
@@ -122,8 +122,12 @@ int balanced(char *expression)
 		expression++;
 	}
 	if (!isEmptyStack(&s_temp))
+	{
+		removeAllItemsFromStack(&s_temp);
 		return 1;
-	return 0;
+	}
+	else
+		return 0;
 }
 
 ////////////////////////////////////////////////////////////
