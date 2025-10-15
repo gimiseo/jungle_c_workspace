@@ -41,6 +41,25 @@ int isEmpty(Stack *s);
 void removeAll(BSTNode **node);
 BSTNode* removeNodeFromTree(BSTNode *root, int value);
 
+void printSimpleTree(BSTNode *root, int level, char side)
+{
+    if (root == NULL)
+        return;
+
+    for (int i = 0; i < level; i++)
+        printf("  "); // 들여쓰기
+
+    if (side == 'L')
+        printf("L-");
+    else if (side == 'R')
+        printf("R-");
+
+    printf("%d\n", root->item);
+
+    printSimpleTree(root->left, level + 1, 'L');
+    printSimpleTree(root->right, level + 1, 'R');
+}
+
 ///////////////////////////// main() /////////////////////////////////////////////
 
 int main()
@@ -74,6 +93,15 @@ int main()
 			postOrderIterativeS2(root); // You need to code this function
 			printf("\n");
 			break;
+		case 3:
+    		printf("Current tree structure:\n");
+    		printSimpleTree(root, 0, ' ');
+    		break;
+		case 4:
+    		printf("삭제하고 싶은 노드를 골라라: ");
+			scanf("%d", &i);
+    		root = removeNodeFromTree(root, i);
+    		break;
 		case 0:
 			removeAll(&root);
 			break;
@@ -91,14 +119,75 @@ int main()
 
 void postOrderIterativeS2(BSTNode *root)
 {
-	 /* add your code here */
+	 BSTNode * cur;
+
+	Stack s1;
+	Stack s2;
+	s1.top = NULL;
+	s2.top = NULL;
+	if (root == NULL)
+	{
+		printf("empty");
+		return;
+	}
+	push(&s1, root);
+	while(s1.top != NULL)
+	{
+		cur = pop(&s1);
+		push(&s2, cur);
+		if (cur->left != NULL)
+			push(&s1, cur->left);
+		if (cur->right != NULL)
+			push(&s1, cur->right);
+	}
+	while (s2.top != NULL)
+	{
+		cur = pop(&s2);
+		printf("%d ", cur->item);
+	}
 }
 
 /* Given a binary search tree and a key, this function
    deletes the key and returns the new root. Make recursive function. */
-BSTNode* removeNodeFromTree(BSTNode *root, int value)
+
+BSTNode	*find_inorder_successor(BSTNode *node)
 {
-	/* add your code here */
+	BSTNode *cur = node;
+
+	while (cur != NULL && cur->left != NULL)
+	{
+		cur = cur->left;
+	}
+	return cur;
+}
+
+BSTNode	*removeNodeFromTree(BSTNode *root, int value)
+{
+	if (root == NULL)
+		return NULL;
+	if (value < root->item)
+		root->left = removeNodeFromTree(root->left, value);
+	else if (value > root->item)
+		root->right = removeNodeFromTree(root->right, value);
+	else
+	{
+		if (root->left == NULL)
+		{
+			BSTNode *temp = root->right;
+			free(root);
+			return temp;
+		}
+		else if (root->right == NULL)
+		{
+			BSTNode *temp = root->left;
+			free(root);
+			return temp;
+		}
+		BSTNode *temp = find_inorder_successor(root->right);
+		root->item = temp->item;
+		root->right = removeNodeFromTree(root->right, temp->item);
+	}
+	return root;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
