@@ -101,6 +101,7 @@ int main()
     		printf("삭제하고 싶은 노드를 골라라: ");
 			scanf("%d", &i);
     		root = removeNodeFromTree(root, i);
+			printf("%d\n",root->item);
     		break;
 		case 0:
 			removeAll(&root);
