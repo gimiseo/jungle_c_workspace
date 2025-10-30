@@ -241,84 +241,72 @@ static void erase_fix_up(rbtree *t, node_t *node)
 
   while (node != t->root && node->color == RBTREE_BLACK)
   {
-    // Case: node가 부모의 왼쪽 자식일 때
     if (node == node->parent->left)
     {
-      bro = node->parent->right; // 형제는 오른쪽
+      bro = node->parent->right;
 
-      // Case 1: 형제가 RED
       if (bro->color == RBTREE_RED)
       {
         bro->color = RBTREE_BLACK;
         node->parent->color = RBTREE_RED;
         L_rotate(t, node->parent);
-        bro = node->parent->right; // 회전 후 형제가 바뀌었으므로 갱신
+        bro = node->parent->right;
       }
 
-      // Case 2: 형제가 BLACK이고, 형제의 두 자식이 모두 BLACK
       if (bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
       {
         bro->color = RBTREE_RED;
-        node = node->parent; // 문제를 부모 노드로 이동
+        node = node->parent;
       }
       else
       {
-        // Case 3: 형제가 BLACK, 형제의 왼쪽 자식(inner child)이 RED,
-        //         오른쪽 자식(outer child)이 BLACK
         if (bro->right->color == RBTREE_BLACK)
         {
           bro->left->color = RBTREE_BLACK;
           bro->color = RBTREE_RED;
           R_rotate(t, bro);
-          bro = node->parent->right; // 형제 갱신
+          bro = node->parent->right;
         }
 
-        // Case 4: 형제가 BLACK, 형제의 오른쪽 자식(outer child)이 RED
         bro->color = node->parent->color;
         node->parent->color = RBTREE_BLACK;
-        bro->right->color = RBTREE_BLACK; // (수정된 부분)
+        bro->right->color = RBTREE_BLACK;
         L_rotate(t, node->parent);
-        node = t->root; // 루프 종료
+        node = t->root;
       }
     }
-    // Case: node가 부모의 오른쪽 자식일 때 (왼쪽 케이스와 완벽히 대칭)
     else
     {
-      bro = node->parent->left; // 형제는 왼쪽
+      bro = node->parent->left;
 
-      // Case 1: 형제가 RED
+
       if (bro->color == RBTREE_RED)
       {
         bro->color = RBTREE_BLACK;
         node->parent->color = RBTREE_RED;
         R_rotate(t, node->parent);
-        bro = node->parent->left; // 회전 후 형제가 바뀌었으므로 갱신
+        bro = node->parent->left;
       }
-
-      // Case 2: 형제가 BLACK이고, 형제의 두 자식이 모두 BLACK
       if (bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
       {
         bro->color = RBTREE_RED;
-        node = node->parent; // 문제를 부모 노드로 이동
+        node = node->parent;
       }
       else
       {
-        // Case 3: 형제가 BLACK, 형제의 오른쪽 자식(inner child)이 RED,
-        //         왼쪽 자식(outer child)이 BLACK
         if (bro->left->color == RBTREE_BLACK)
         {
           bro->right->color = RBTREE_BLACK;
           bro->color = RBTREE_RED;
           L_rotate(t, bro);
-          bro = node->parent->left; // 형제 갱신
+          bro = node->parent->left;
         }
 
-        // Case 4: 형제가 BLACK, 형제의 왼쪽 자식(outer child)이 RED
         bro->color = node->parent->color;
         node->parent->color = RBTREE_BLACK;
         bro->left->color = RBTREE_BLACK;
         R_rotate(t, node->parent);
-        node = t->root; // 루프 종료
+        node = t->root;
       }
     }
   }
@@ -328,21 +316,19 @@ static void erase_fix_up(rbtree *t, node_t *node)
 
 static void rbtree_transplant(rbtree *t, node_t *u, node_t *v) 
 {
-  if (u->parent == t->nil) {
+  if (u->parent == t->nil)
     t->root = v;
-  } else if (u == u->parent->left) {
+  else if (u == u->parent->left)
     u->parent->left = v;
-  } else {
+  else
     u->parent->right = v;
-  }
   v->parent = u->parent;
 }
 
 static node_t *rbtree_find_successor(rbtree *t, node_t *node) 
 {
-  while (node->left != t->nil) {
+  while (node->left != t->nil)
     node = node->left;
-  }
   return node;
 }
 
@@ -351,52 +337,41 @@ int rbtree_erase(rbtree *t, node_t *p)
   if (!t || t->root == t->nil || p == NULL || p == t->nil)
     return 0;
 
-  node_t *y = p; // y: 실제로 트리 구조에서 제거될 노드
-  node_t *x;     // x: y의 자리를 대체할 노드 (extra black을 가질 수 있음)
-  color_t y_original_color = y->color; // y의 원래 색 (fixup 호출 여부 결정)
+  node_t *y = p;
+  node_t *x;
+  color_t y_original_color = y->color; 
 
-  // Case 1 & 2: p가 자식을 0개 또는 1개 갖는 경우
-  // (p의 왼쪽 자식이 없으면, 오른쪽 자식으로 p를 대체)
-  if (p->left == t->nil) {
+  if (p->left == t->nil)
+  {
     x = p->right;
     rbtree_transplant(t, p, p->right);
   } 
-  // (p의 오른쪽 자식이 없으면, 왼쪽 자식으로 p를 대체)
   else if (p->right == t->nil) {
     x = p->left;
     rbtree_transplant(t, p, p->left);
   }
-  // Case 3: p가 자식을 2개 갖는 경우
-  else {
-    // y를 p의 successor (오른쪽 서브트리의 최소값)로 설정
-    y = rbtree_find_successor(t, p->right);
-    y_original_color = y->color; // 삭제될 노드(y)의 *원래* 색을 저장
-    x = y->right; // x는 y의 오른쪽 자식 (y는 왼쪽 자식이 없음)
 
-    if (y->parent == p) {
-      // Case 3a: y가 p의 바로 오른쪽 자식인 경우
-      // x가 nil일 수도 있으므로, nil->parent를 설정해야 함
+  else
+  {
+    y = rbtree_find_successor(t, p->right);
+    y_original_color = y->color; 
+    x = y->right;
+
+    if (y->parent == p)
       x->parent = y;
-    } else {
-      // Case 3b: y가 p의 자식이 아닌 경우 (더 깊이 있는 경우)
-      // 1. y를 y의 오른쪽 자식(x)으로 대체 (y를 먼저 뽑아냄)
+    else 
+    {
       rbtree_transplant(t, y, y->right);
-      // 2. p의 오른쪽 자식을 y에 연결
       y->right = p->right;
       y->right->parent = y;
     }
-
-    // 3. p를 y로 대체 (p의 부모와 y를 연결)
     rbtree_transplant(t, p, y);
-    // 4. p의 왼쪽 자식을 y에 연결
     y->left = p->left;
     y->left->parent = y;
-    // 5. y에 p의 색을 부여 (p의 자리를 계승)
     y->color = p->color;
   }
-  if (y_original_color == RBTREE_BLACK) {
+  if (y_original_color == RBTREE_BLACK)
     erase_fix_up(t, x);
-  }
   free(p);
   return 1;
 }
