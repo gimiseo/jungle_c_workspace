@@ -251,7 +251,7 @@ void avl_delete(avl_tree_t *tree, avl_node_t *z) {
     avl_node_t *rebalance_start_node = x->parent;
 
     // 만약 z가 아닌 후계자(y)를 제거했다면,
-    // y의 데이터를 z로 '복사'하는 대신, y로 z를 '교체'합니다.
+    // y의 데이터를 z로 '복사'하는 대신, y로 z를 '교체'
     if (y != z) {
         // z를 y로 교체 (z의 링크들을 y로 이식)
         transplant(tree, z, y);
@@ -278,7 +278,7 @@ void avl_delete(avl_tree_t *tree, avl_node_t *z) {
 avl_node_t *avl_find_best_fit(avl_tree_t *tree, size_t size) {
     avl_node_t *best = find_best_fit_helper(tree->root, size, &nil_sentinel);
     
-    // nil을 반환하는 대신, C 표준인 NULL을 반환합니다.
+    // nil을 반환하는 대신, C 표준인 NULL을 반환
     if (best == &nil_sentinel) {
         return NULL;
     } else {

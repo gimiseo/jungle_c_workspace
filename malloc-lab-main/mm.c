@@ -105,6 +105,10 @@ static void *seg_lists[NUM_SEG_LISTS];
 
 /* avl 트리 루트 (≥3073바이트 블록 관리) */
 static avl_tree_t large_blocks_tree;
+
+
+
+
 static void *only_for_16;
 
 /* * ----------------------------------------------------------------- 
